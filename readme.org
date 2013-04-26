@@ -1,0 +1,33 @@
+* mathematical expressions
+essentially we just want to describe these by giving them abstract shape
+** sums (with minus signs, or other stuff)
+** ratios / fractions
+** products
+** parentheses
+** function calls
+** underlying mathematical objects
+** variables with reference to definition?
+** exponents / superscripts
+** indizes / subscripts
+
+* colouring
+** automatic
+** explicit
+** custom predicates/functions returning colour
+
+* display styles
+** automatic factorisation
+** valuating at one place
+
+* output formats
+** Mathematica
+this should be considered carefully, because this is about than presentation.
+** LaTeX
+** text output (supposedly similar to TeX)
+** CLIM UI output
+** LISP code
+same issues as with mathematica output
+
+* input formats
+** math-utils data
+** formula in lisp style
