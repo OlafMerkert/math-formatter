@@ -1,7 +1,12 @@
 (in-package :math-formatter)
 
 (defclass abstract-format ()
-  ())
+  ((colour :initarg :colour
+           :initform 'black
+           :accessor colour)
+   (scaling :initarg :scaling
+            :initform 0
+            :accessor scaling)))
 
 (defun carx (x)
   (if (consp x)
@@ -32,13 +37,12 @@
 
 (define-abstract-formats
   (object-data body object)
-  (integer)
+  (integer n)
   (ellipsis)
   (fraction numerator denominator)
   (superscript base exponent)
   (subscript base index)
   (infix-expression operators arguments)
-
   (parentheses body (open #\() (close #\))))
 
 (defun foreach (item list)
@@ -72,5 +76,5 @@
   (if (length=1 partial-quotients)
       (first partial-quotients)
       (sum (list (first partial-quotients)
-                 (fraction 1
+                 (fraction (integer 1)
                            (continued-fraction (rest partial-quotients)))))))
