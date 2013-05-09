@@ -3,7 +3,8 @@
            #:numerator
            #:denominator
            #:open
-           #:close)
+           #:close
+           #:sum)
   (:use :cl :ol :iterate )
   (:export))
 
