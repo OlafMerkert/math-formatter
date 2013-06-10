@@ -1,3 +1,4 @@
+# -*- ispell-dictionary: "en_GB" -*-
 * mathematical expressions
 essentially we just want to describe these by giving them abstract shape
 ** sums (with minus signs, or other stuff)
@@ -17,11 +18,12 @@ essentially we just want to describe these by giving them abstract shape
 
 * display styles
 ** automatic factorisation
+over all places, or just a given set of places
 ** valuating at one place
 
 * output formats
 ** Mathematica
-this should be considered carefully, because this is about than presentation.
+this should be considered carefully, because this is about more than presentation.
 ** LaTeX
 ** text output (supposedly similar to TeX)
 ** CLIM UI output
@@ -31,3 +33,4 @@ same issues as with mathematica output
 * input formats
 ** math-utils data
 ** formula in lisp style
+

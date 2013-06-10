@@ -8,12 +8,6 @@
             :initform 0
             :accessor scaling)))
 
-(defun carx (x)
-  (if (consp x)
-      (car x)
-      x))
-
-
 (defmacro define-abstract-format (name &rest slots)
   `(progn
      (defclass ,name (abstract-format)
@@ -26,7 +20,7 @@
      ;; todo really want &optional??
      (defun ,name (&optional ,@slots)
        (make-instance ',name
-                      ,@(mapcan #`(,(keyw (carx a1)) ,(carx a1)) slots)))))
+                      ,@(mapcan #`(,(keyw (unbox1 a1)) ,(unbox1 a1)) slots)))))
 
 (defmacro define-composite-format (name slots &body body)
   `(defun ,name (&optional ,@slots)
@@ -36,35 +30,40 @@
   `(progn ,@(mapcar #`(define-abstract-format ,@a1) formats)))
 
 (define-abstract-formats
+  (ellipsis)
+  (infinity)
   (object-data body object)
   (integer n)
-  (ellipsis)
   (fraction numerator denominator)
   (superscript base exponent)
   (subscript base index)
   (infix-expression operators arguments)
   (parentheses body (open #\() (close #\))))
 
-(defun foreach (item list)
-  (map 'list (ilambda (x) item) list))
 
-(defun foreach1 (first item list)
-  (list* first (foreach item (rest list))))
 
 ;;; todo composite formats
+(define-composite-format tuple (coordinates (separator #\,) )
+  (parentheses (infix-expression (foreach1 nil separator coordinates)
+                                  coordinates)))
+
 (define-composite-format prefix-expression (operator arguments (separator #\,))
   (infix-expression (list operator)
-                    (parentheses (infix-expression (foreach1 nil separator arguments)
-                                                   arguments))))
+                    (tuple arguments separator)))
 
 (define-composite-format factorisation (factors)
-  (infix-expression (foreach nil factors)
+  (infix-expression (foreach1 nil '* factors)
                     (map 'list (lambda (factor)
                                  (if (consp factor)
                                      ;; todo verify factorisation uses conses?
                                      (superscript (car factor) (cdr factor))
                                      factor))
                          factors)))
+
+(define-composite-format rational-factorisation (factors)
+  (let ((nums (remove-if-not (lambda (factor) (or (atom factor) (<= 0 (cdr factor)))) factors))
+        (dens (remove-if-not (lambda (factor) (and (consp factor) (> 0 (cdr factor)))) factors)))
+    (fraction (factorisation nums) (factorisation dens))))
 
 (define-composite-format sum (summands)
   (infix-expression (foreach1 nil '+ summands) summands))
