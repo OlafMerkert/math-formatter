@@ -5,7 +5,9 @@
            #:denominator
            #:open
            #:close
-           #:sum)
+           #:sum
+           #:number
+           #:variable)
   (:use :cl :ol :iterate )
   (:export
    #:+dots+
@@ -21,7 +23,8 @@
    #:numerator
    #:denominator
    #:superscript
-   #:base exponent
+   #:base
+   #:exponent
    #:subscript
    #:index
    #:infix-expression
@@ -31,8 +34,21 @@
    #:body
    #:open
    #:close
-   ))
+   #:tuple
+   #:prefix-expression
+   #:factorisation
+   #:rational-factorisation
+   #:sum
+   #:product
+   #:continued-fraction
+   #:*default-scaling*
+   #:*default-colour*
+   #:variable
+   #:name
+   #:content
+   #:text
+   #:number
+   #:beside))
 
 (in-package :math-formatter)
-
 

@@ -1,11 +1,14 @@
 (in-package :math-formatter)
 
+(defparameter *default-scaling* 0)
+(defparameter *default-colour* 'black)
+
 (defclass abstract-format ()
   ((colour :initarg :colour
-           :initform 'black
+           :initform *default-colour*
            :accessor colour)
    (scaling :initarg :scaling
-            :initform 0
+            :initform *default-scaling*
             :accessor scaling)))
 
 (defmacro define-abstract-format (name &rest slots)
@@ -18,13 +21,20 @@
                                   :initarg ,(keyw slot-name))))
                  slots))
      ;; todo really want &optional??
-     (defun ,name (&optional ,@slots)
+     (defun ,name (&optional ,@slots
+                             (scaling *default-scaling*)
+                             (colour *default-colour*))
        (make-instance ',name
-                      ,@(mapcan #`(,(keyw (unbox1 a1)) ,(unbox1 a1)) slots)))))
+                      ,@(mapcan #`(,(keyw (unbox1 a1)) ,(unbox1 a1))
+                                (append slots '(scaling colour)))))))
 
 (defmacro define-composite-format (name slots &body body)
-  `(defun ,name (&optional ,@slots)
-     ,@body))
+  `(defun ,name (&optional ,@slots
+                           (scaling *default-scaling*)
+                           (colour *default-colour*))
+     (let ((*default-scaling* scaling)
+           (*default-colour* colour))
+       ,@body)))
 
 (defmacro define-abstract-formats (&body formats)
   `(progn ,@(mapcar #`(define-abstract-format ,@a1) formats)))
@@ -34,6 +44,9 @@
   (infinity)
   (object-data body object)
   (integer n)
+  (number n)
+  (variable name)
+  (text content)
   (fraction numerator denominator)
   (superscript base exponent)
   (subscript base index)
@@ -44,8 +57,9 @@
 
 ;;; todo composite formats
 (define-composite-format tuple (coordinates (separator #\,) )
-  (parentheses (infix-expression (foreach1 nil separator coordinates)
-                                  coordinates)))
+  (parentheses (if (<= (length coordinates) 1) (first coordinates)
+                   (infix-expression (foreach1 nil separator coordinates)
+                                     coordinates))))
 
 (define-composite-format prefix-expression (operator arguments (separator #\,))
   (infix-expression (list operator)
@@ -77,3 +91,6 @@
       (sum (list (first partial-quotients)
                  (fraction (integer 1)
                            (continued-fraction (rest partial-quotients)))))))
+
+(define-composite-format beside (things)
+  (infix-expression (foreach nil things) things))
