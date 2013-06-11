@@ -48,7 +48,9 @@
    #:content
    #:text
    #:number
-   #:beside))
+   #:beside
+   #:infinity
+   #:ellipsis))
 
 (in-package :math-formatter)
 
