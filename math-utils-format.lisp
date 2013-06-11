@@ -7,7 +7,9 @@
   (:import-from :polynomials #:polynomial #:coefficients #:degree #:var)
   (:import-from :power-series #:power-series #:constant-series #:constant-coefficient)
   (:import-from :valuations-coeff #:polynomial-values #:power-series-values)
-  (:export))
+  (:export
+   #:format
+   #:*print-poly-pretty*))
 
 (in-package :math-utils-format)
 
@@ -52,7 +54,7 @@
                                     (format (imagpart complex)))))))
 
 
-;;; fancier stuff
+;;; more complicated math objects
 (defmethod format% ((integer-mod integer-mod))
   (mft:beside (format (remainder integer-mod))
               (mft:tuple (list (format% "mod")
@@ -63,6 +65,10 @@
 
 (defmethod format% ((ec-point-infinity ec-point-infinity))
   (mft:infinity))
+
+(defmethod format% ((fraction fractions:fraction))
+  (mft:fraction (fractions:numerator fraction)
+                (fractions:denominator fraction)))
 
 ;;; polynomials and power series
 (defmethod format% ((constant-series constant-series))
