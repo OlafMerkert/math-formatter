@@ -7,23 +7,43 @@
   (:import-from :polynomials #:polynomial #:coefficients #:degree #:var)
   (:import-from :power-series #:power-series #:constant-series #:constant-coefficient)
   (:import-from :valuations-coeff #:polynomial-values #:power-series-values)
+  (:import-from :continued-fractions-power-series #:continued-fraction #:partial-quotients)
+  (:import-from :infinite-math #:infinity+ #:infinity-)
   (:export
    #:format
-   #:*print-poly-pretty*))
+   #:*print-poly-pretty*
+   #:*print-additional-terms*
+   #:*continued-fraction-display-length*
+   #:*enable-presentations*))
 
 (in-package :math-utils-format)
 
 
 (defgeneric format% (object))
 
+(defparameter *enable-presentations* nil)
+
+(defmacro! predif (o!test object then else)
+  "Like `if', but if `test' is a function, check for its value on
+`object'. Otherwise, fall back to the behaviour of `if'."
+  `(if (or (not ,g!test)
+           (and (functionp ,g!test)
+                (not (funcall ,g!test ,object))))
+       ,else
+       ,then))
+
 (defun format (object)
-  (format% object))
+  (predif *enable-presentations* object
+          (mft:object-data (format% object)
+                           object)
+          (format% object)))
 
 (defparameter *integer-factorisation* nil)
 
 ;;; primitive objects
 (defmethod format% ((integer integer))
   ;; TODO automatic factorisation
+  ;; TODO add colour
   (mft:integer integer))
 
 (defmethod format% ((rational rational))
@@ -32,6 +52,7 @@
 
 
 (defmethod format% ((symbol symbol))
+  ;; TODO add colour
   (mft:variable symbol))
 
 (defmethod format% ((string string))
@@ -67,14 +88,18 @@
   (mft:infinity))
 
 (defmethod format% ((fraction fractions:fraction))
-  (mft:fraction (fractions:numerator fraction)
-                (fractions:denominator fraction)))
+  ;; no need for denom, when it is simple.
+  (if (or (gm:zero-p (fractions:numerator fraction))
+          (gm:one-p (fractions:denominator fraction)))
+      (format (fractions:numerator fraction))
+      (mft:fraction (format (fractions:numerator fraction))
+                    (format (fractions:denominator fraction)))))
 
 ;;; polynomials and power series
 (defmethod format% ((constant-series constant-series))
   (format (constant-coefficient constant-series)))
 
-(defparameter print-additional-terms 5)
+(defparameter *print-additional-terms* 5)
 
 (defparameter *print-poly-pretty* nil)
 
@@ -139,7 +164,7 @@
 (defun format-power-series (power-series)
   (let ((cc (clean-coeffs (lazy-array-take (coefficients power-series)
                                            (+ (max (degree power-series) 0)
-                                              print-additional-terms)
+                                              *print-additional-terms*)
                                            nil)
                           (degree power-series))))
     (mft:infix-expression
@@ -153,7 +178,7 @@
 
 (defun format-power-series/all (power-series)
   (let ((cc (all-coeffs (lazy-array-take (coefficients power-series)
-                                         (+ (degree power-series) print-additional-terms)
+                                         (+ (degree power-series) *print-additional-terms*)
                                          nil)
                         (degree power-series))))
     (mft:sum
@@ -175,6 +200,25 @@
 
 (defmethod format% ((power-series-values power-series-values))
   (format-power-series/all power-series-values))
+
+;;; continued fractions
+(defparameter *continued-fraction-display-length* 5)
+
+(defmethod format% ((continued-fraction continued-fraction))
+  (mft:continued-fraction (append1
+                           (map 'list
+                                #'format
+                                (lazy-array-take
+                                 (partial-quotients continued-fraction)
+                                 *continued-fraction-display-length*
+                                 nil))
+                           (mft:ellipsis))))
+
+(defmethod format% ((inf (eql infinity+)))
+  (mft:infinity))
+
+(defmethod format% ((inf (eql infinity-)))
+  (mft:infix-expression (list '-) (list (mft:infinity))))
 
 
 ;; elliptic-curve-weierstrass

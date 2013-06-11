@@ -1,6 +1,7 @@
 (defsystem math-formatter
   :depends-on (ol-utils iterate
-                        math-utils)
+                        math-utils
+                        continued-fractions)
   :serial t
   :components ((:file "packages")
                (:file "format-definitions")
