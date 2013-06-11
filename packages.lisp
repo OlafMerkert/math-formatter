@@ -50,7 +50,8 @@
    #:number
    #:beside
    #:infinity
-   #:ellipsis))
+   #:ellipsis
+   #:formatted-p))
 
 (in-package :math-formatter)
 

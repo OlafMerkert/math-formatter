@@ -11,6 +11,9 @@
             :initform *default-scaling*
             :accessor scaling)))
 
+(defun formatted-p (object)
+  (typep object 'abstract-format))
+
 (defmacro define-abstract-format (name &rest slots)
   `(progn
      (defclass ,name (abstract-format)
