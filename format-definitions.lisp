@@ -1,7 +1,7 @@
 (in-package :math-formatter)
 
 (defparameter *default-scaling* 0)
-(defparameter *default-colour* 'black)
+(defparameter *default-colour* nil)
 
 (defclass abstract-format ()
   ((colour :initarg :colour
@@ -25,16 +25,16 @@
                  slots))
      ;; todo really want &optional??
      (defun ,name (&optional ,@slots
-                             (scaling *default-scaling*)
-                             (colour *default-colour*))
+                             (colour *default-colour*)
+                             (scaling *default-scaling*))
        (make-instance ',name
                       ,@(mapcan #`(,(keyw (unbox1 a1)) ,(unbox1 a1))
                                 (append slots '(scaling colour)))))))
 
 (defmacro define-composite-format (name slots &body body)
   `(defun ,name (&optional ,@slots
-                           (scaling *default-scaling*)
-                           (colour *default-colour*))
+                           (colour *default-colour*)
+                           (scaling *default-scaling*))
      (let ((*default-scaling* scaling)
            (*default-colour* colour))
        ,@body)))
@@ -56,6 +56,12 @@
   (infix-expression operators arguments)
   (parentheses body (open #\() (close #\))))
 
+;; automatically scale exponent and index down
+(defmethod initialize-instance :after ((subscript subscript) &key)
+  (decf (scaling subscript)))
+
+(defmethod initialize-instance :after ((superscript superscript) &key)
+  (decf (scaling superscript)))
 
 
 ;;; todo composite formats
