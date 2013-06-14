@@ -73,8 +73,7 @@
                                      coordinates))))
 
 (define-composite-format prefix-expression (operator arguments (separator #\,))
-  (infix-expression (list operator)
-                    (tuple arguments separator)))
+  (infix-expression1 operator (tuple arguments separator)))
 
 (define-composite-format factorisation (factors)
   (infix-expression (foreach1 nil '* factors)
@@ -107,4 +106,4 @@
   (infix-expression (foreach nil things) things))
 
 (define-composite-format infix-expression1 (op arg)
-  (infix-expression1 (list op) (list arg)))
+  (infix-expression (list op) (list arg)))

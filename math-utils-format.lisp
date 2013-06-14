@@ -14,7 +14,8 @@
    #:*print-poly-pretty*
    #:*print-additional-terms*
    #:*continued-fraction-display-length*
-   #:*enable-presentations*))
+   #:*enable-presentations*
+   #:format-pretty))
 
 (in-package :math-utils-format)
 
@@ -77,12 +78,13 @@
 
 ;;; more complicated math objects
 (defmethod format% ((integer-mod integer-mod))
-  (mft:beside (format (remainder integer-mod))
-              (mft:tuple (list (format% "mod")
-                               (format (modulus integer-mod))))))
+  (mft:beside (list (format (remainder integer-mod))
+                    (mft:parentheses
+                     (mft:beside(list (format% "mod")
+                                      (format (modulus integer-mod))))))))
 
 (defmethod format% ((point-2 point-2))
-  (mft:tuple (list (x point-2) (y point-2))))
+  (mft:tuple (list (format (x point-2)) (format (y point-2)))))
 
 (defmethod format% ((ec-point-infinity ec-point-infinity))
   (mft:infinity))
@@ -218,11 +220,15 @@
   (mft:infinity))
 
 (defmethod format% ((inf (eql infinity-)))
-  (mft:infix-expression (list '-) (list (mft:infinity))))
-
+  (mft:infix-expression1 '- (mft:infinity)))
 
 ;; elliptic-curve-weierstrass
 ;; elementary-matrix
 ;; vector
 
 ;;; TODO what about presentations? those should be automatically generated.
+
+(defun format-pretty (object &key (presentations t))
+  (let ((*print-poly-pretty* t)
+        (*enable-presentations* presentations))
+    (format object)))

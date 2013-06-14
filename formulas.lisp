@@ -63,9 +63,8 @@
                      (mft:product (mapcar #'formula-prepare (rest arguments)))))))
 
 (def-formula-prepare - 
-  ;; TODO handle single argument correctly
   (if (= 1 n)
-      (mft:infix-expression1 '- (first arguments))
+      (mft:infix-expression1 '- (formula-prepare (first arguments)))
       (mft:infix-expression (foreach1 nil '- arguments)
                             (mapcar #'formula-prepare arguments))))
 
@@ -75,15 +74,17 @@
 
 (def-formula-prepare _
   (mft:subscript (formula-prepare (first arguments))
-             (formula-prepare (second arguments))))
+                 (formula-prepare (second arguments))))
 
 (defmethod formula-prepare% ((function-symbol symbol) arguments)
   ;; TODO put the arguments in brackets, perhaps separated by commas
-  (mft:prefix-expression (mft:variable function-symbol) arguments))
+  (mft:prefix-expression function-symbol (mapcar #'formula-prepare arguments)))
 
 
 (defmacro formula-with-math-objects (math-objects formula)
-  `(let ,(mapcar (compose #`(,(first a1) (math-utils-format:format ,(second a1)))
+  `(let ,(mapcar (compose #`(,(first a1) (math-utils-format:format-pretty
+                                          ,(second a1)
+                                          :presentations t))
                           (lambda (mo-spec)
                             (cond ((consp mo-spec) mo-spec)
                                   ((symbolp mo-spec) (list mo-spec mo-spec))
