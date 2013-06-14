@@ -46,10 +46,12 @@
   (ellipsis)
   (infinity)
   (object-data body object)
+  ;; atomic formats
   (integer n)
   (number n)
   (variable name)
   (text content)
+  ;; compound formats
   (fraction numerator denominator)
   (superscript base exponent)
   (subscript base index)
@@ -58,10 +60,10 @@
 
 ;; automatically scale exponent and index down
 (defmethod initialize-instance :after ((subscript subscript) &key)
-  (decf (scaling subscript)))
+  (decf (scaling (index subscript))))
 
 (defmethod initialize-instance :after ((superscript superscript) &key)
-  (decf (scaling superscript)))
+  (decf (scaling (exponent superscript))))
 
 
 ;;; todo composite formats
@@ -103,3 +105,6 @@
 
 (define-composite-format beside (things)
   (infix-expression (foreach nil things) things))
+
+(define-composite-format infix-expression1 (op arg)
+  (infix-expression1 (list op) (list arg)))

@@ -51,7 +51,8 @@
    #:beside
    #:infinity
    #:ellipsis
-   #:formatted-p))
+   #:formatted-p
+   #:infix-expression1))
 
 (in-package :math-formatter)
 

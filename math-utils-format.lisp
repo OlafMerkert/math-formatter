@@ -23,7 +23,7 @@
 
 (defparameter *enable-presentations* nil)
 
-(defmacro! predif (o!test object then else)
+(defmacro! predif ((o!test object) then else)
   "Like `if', but if `test' is a function, check for its value on
 `object'. Otherwise, fall back to the behaviour of `if'."
   `(if (or (not ,g!test)
@@ -33,7 +33,7 @@
        ,then))
 
 (defun format (object)
-  (predif *enable-presentations* object
+  (predif (*enable-presentations* object)
           (mft:object-data (format% object)
                            object)
           (format% object)))
