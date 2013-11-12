@@ -79,4 +79,6 @@
                         power-series:constant-series
                         fractions:fraction))
   (defmethod print-object ((object math-type) stream)
-    (render (math-utils-format:format object) stream)))
+    (princ "#M[" stream)
+    (render (math-utils-format:format object) stream)
+    (princ "]" stream)))
