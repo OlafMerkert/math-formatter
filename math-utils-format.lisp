@@ -9,6 +9,8 @@
   (:import-from :valuations-coeff #:polynomial-values #:power-series-values)
   (:import-from :continued-fractions-power-series #:continued-fraction #:partial-quotients)
   (:import-from :infinite-math #:infinity+ #:infinity-)
+  (:shadowing-import-from :linear-algebra/vectors #:vector )
+  (:import-from :linear-algebra/vectors #:matrix #:entries)
   (:export
    #:format
    #:*print-poly-pretty*
@@ -222,9 +224,11 @@
 (defmethod format% ((inf (eql infinity-)))
   (mft:infix-expression1 '- (mft:infinity)))
 
-;; elliptic-curve-weierstrass
-;; elementary-matrix
-;; vector
+;; todo elliptic-curve-weierstrass
+;; todo elementary-matrix
+;;; vector
+(defmethod format% ((vector vector))
+  (mft:matrix2 (map-array1 #'format (entries vector))))
 
 ;;; TODO what about presentations? those should be automatically generated.
 

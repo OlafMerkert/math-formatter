@@ -52,7 +52,11 @@
    #:infinity
    #:ellipsis
    #:formatted-p
-   #:infix-expression1))
+   #:infix-expression1
+   #:grid2
+   #:elements
+   #:matrix2
+   #:dim))
 
 (in-package :math-formatter)
 

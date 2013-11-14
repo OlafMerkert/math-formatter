@@ -79,6 +79,24 @@
 (def-render-method (object-data)
   (rndr (mft:body object-data)))
 
+(def-render-method (grid2)
+  (ecase (mft:dim grid2)
+    (1 ;; output horizontal grid
+     (pr "\\begin{matrix}")
+     (iter (for element in-vector (mft:elements grid2))
+           (unless (first-iteration-p) (pr " & "))
+           (rndr element))
+     (pr "\\end{matrix}"))
+    (2 ;; output 2d grid
+     (pr "\\begin{matrix}")
+     (let ((array (mft:elements grid2)))
+       (iter (for i from 0 below (array-dimension array 0))
+             (unless (first-iteration-p) (pr " \\\\"))
+             (iter (for j from 0 below (array-dimension array 1))
+                   (unless (first-iteration-p) (pr " & "))
+                   (rndr (aref array i j)))))
+     (pr "\\end{matrix}"))))
+
 ;;; setup print-object methods
 
 (defun print-tex (object stream)

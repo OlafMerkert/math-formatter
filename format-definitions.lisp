@@ -56,7 +56,8 @@
   (superscript base exponent)
   (subscript base index)
   (infix-expression operators arguments)
-  (parentheses body (open #\() (close #\))))
+  (parentheses body (open #\() (close #\)))
+  (grid2 elements))
 
 ;; automatically scale exponent and index down
 (defmethod initialize-instance :after ((subscript subscript) &key)
@@ -64,6 +65,10 @@
 
 (defmethod initialize-instance :after ((superscript superscript) &key)
   (decf (scaling (exponent superscript))))
+
+;; helper functions for working with grids
+(defun dim (grid2)
+  (length (array-dimensions (elements grid2))))
 
 
 ;;; todo composite formats
@@ -107,3 +112,6 @@
 
 (define-composite-format infix-expression1 (op arg)
   (infix-expression (list op) (list arg)))
+
+(define-composite-format matrix2 (elements)
+  (parentheses (grid2 elements)))
