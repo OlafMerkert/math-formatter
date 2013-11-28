@@ -165,11 +165,15 @@
     (mft:sum
      (mapcar (clambda format-monomial/all (var polynomial) x!) cc))))
 
+(defun ps-coefficients-array (power-series howmany)
+  (ins:seq->array
+   (ins:subsequence (coefficients power-series)
+                    0 (max howmany (+ (degree power-series)
+                                      (floor howmany 2))))) )
+
+
 (defun format-power-series (power-series)
-  (let ((cc (clean-coeffs (lazy-array-take (coefficients power-series)
-                                           (+ (max (degree power-series) 0)
-                                              *print-additional-terms*)
-                                           nil)
+  (let ((cc (clean-coeffs (ps-coefficients-array power-series *print-additional-terms*)
                           (degree power-series))))
     (mft:infix-expression
      (append1
@@ -181,9 +185,7 @@
       (mft:ellipsis)))))
 
 (defun format-power-series/all (power-series)
-  (let ((cc (all-coeffs (lazy-array-take (coefficients power-series)
-                                         (+ (degree power-series) *print-additional-terms*)
-                                         nil)
+  (let ((cc (all-coeffs (ps-coefficients-array power-series *print-additional-terms*)
                         (degree power-series))))
     (mft:sum
      (append1 (mapcar (clambda format-monomial/all (var power-series) x!) cc)
@@ -212,10 +214,10 @@
   (mft:continued-fraction (append1
                            (map 'list
                                 #'format
-                                (lazy-array-take
-                                 (partial-quotients continued-fraction)
-                                 *continued-fraction-display-length*
-                                 nil))
+                                (ins:seq->array
+                                 (ins:subsequence
+                                  (partial-quotients continued-fraction)
+                                  0 *continued-fraction-display-length*)))
                            (mft:ellipsis))))
 
 (defmethod format% ((inf (eql infinity+)))
