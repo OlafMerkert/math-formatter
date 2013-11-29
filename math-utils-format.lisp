@@ -50,7 +50,7 @@
 * :abbrev -- apply `abbrev-integer' to the integer
 * :abbrev+ -- apply `abbrev-integer' to the integer")
 
-(defparameter abbrev-length 10
+(defparameter abbrev-length 15
   "this should be something >= 8, otherwise `abbrev-integer' might fail.")
 
 (defun abbrev-integer (n &optional insert-length)
@@ -62,7 +62,7 @@ may be of varying length."
          (l (length string)))
     (if (<= l abbrev-length)
         (mft:integer n)
-        (let ((extr (floor (- abbrev-length 4) 2)))
+        (let ((extr 3 #|(floor (- abbrev-length 4) 2)|#))
           (mft:text (concatenate 'string
                                  (subseq string 0 extr)
                                  "::"
