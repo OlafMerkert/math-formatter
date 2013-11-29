@@ -41,13 +41,52 @@
                            object)
           (format% object)))
 
-(defparameter *integer-factorisation* nil)
+(defparameter *integer-display* nil
+  "Possible values:
+* nil -- just produce an integer
+* an integer S -- pull out all factors smaller than S, in particular the sign
+* :factorise -- factorise completely
+* :abbrev -- apply `abbrev-integer' to the integer
+* :abbrev+ -- apply `abbrev-integer' to the integer")
+
+(defparameter abbrev-length 10
+  "this should be something >= 8, otherwise `abbrev-integer' might fail.")
+
+(defun abbrev-integer (n &optional insert-length)
+  "Given a positive integer `n', produce a string representation that
+has length at most `abbrev-length'. If `insert-length' is true,
+indicate the number of digits, however then the string represenation
+may be of varying length."
+  (let* ((string (mkstr n))
+         (l (length string)))
+    (if (<= l abbrev-length)
+        string
+        (let ((extr (floor (- abbrev-length 4) 2)))
+          (concatenate 'string
+                       (subseq string 0 extr)
+                       "::"
+                       (when insert-length
+                         (mkstr l))
+                       "::"
+                       (subseq string (- l extr) l))))))
 
 ;;; primitive objects
 (defmethod format% ((integer integer))
-  ;; TODO automatic factorisation
   ;; TODO add colour
-  (mft:integer integer))
+  (cond ((not *integer-display*) (mft:integer integer))
+        ((minusp integer) (mft:infix-expression1 '- (format (- integer))))
+        ;; automatic factorisation
+        ((integerp *integer-display*)
+         (mft:factorisation (nt-f:factorise-over-s integer *integer-display*)
+                        (clambda mft:integer x!)))
+        ((eq :factorise *integer-display*)
+         (mft:factorisation (nt-f:factorise integer)
+                        (clambda mft:integer x!)))
+        ((eq :abbrev *integer-display*)
+         (mft:integer (abbrev-integer integer)))
+        ((eq :abbrev+ *integer-display*)
+         (mft:integer (abbrev-integer integer t)))
+        (t (mft:integer integer))))
 
 (defmethod format% ((rational rational))
   (mft:fraction (format (numerator rational))

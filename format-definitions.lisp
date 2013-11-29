@@ -80,19 +80,20 @@
 (define-composite-format prefix-expression (operator arguments (separator #\,))
   (infix-expression1 operator (tuple arguments separator)))
 
-(define-composite-format factorisation (factors)
+(define-composite-format factorisation (factors (key #'identity))
   (infix-expression (foreach1 nil '* factors)
                     (map 'list (lambda (factor)
                                  (if (consp factor)
                                      ;; todo verify factorisation uses conses?
-                                     (superscript (car factor) (cdr factor))
-                                     factor))
+                                     (superscript (funcall key (car factor))
+                                                  (cdr factor))
+                                     (funcall key factor)))
                          factors)))
 
-(define-composite-format rational-factorisation (factors)
+(define-composite-format rational-factorisation (factors (key #'identity))
   (let ((nums (remove-if-not (lambda (factor) (or (atom factor) (<= 0 (cdr factor)))) factors))
         (dens (remove-if-not (lambda (factor) (and (consp factor) (> 0 (cdr factor)))) factors)))
-    (fraction (factorisation nums) (factorisation dens))))
+    (fraction (factorisation nums key) (factorisation dens key))))
 
 (define-composite-format sum (summands)
   (infix-expression (foreach1 nil '+ summands) summands))
