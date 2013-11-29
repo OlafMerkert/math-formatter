@@ -83,7 +83,13 @@
                                  (if (consp factor)
                                      ;; todo verify factorisation uses conses?
                                      (superscript (funcall key (car factor))
-                                                  (cdr factor))
+                                                  ;; assume exponents
+                                                  ;; are integers
+                                                  ;; fix actually,
+                                                  ;; this formatting
+                                                  ;; should have been
+                                                  ;; done earlier
+                                                  (mft:integer (cdr factor)))
                                      (funcall key factor)))
                          factors)))
 

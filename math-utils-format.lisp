@@ -61,15 +61,15 @@ may be of varying length."
   (let* ((string (mkstr n))
          (l (length string)))
     (if (<= l abbrev-length)
-        string
+        (mft:integer n)
         (let ((extr (floor (- abbrev-length 4) 2)))
-          (concatenate 'string
-                       (subseq string 0 extr)
-                       "::"
-                       (when insert-length
-                         (mkstr l))
-                       "::"
-                       (subseq string (- l extr) l))))))
+          (mft:text (concatenate 'string
+                                 (subseq string 0 extr)
+                                 "::"
+                                 (when insert-length
+                                   (mkstr l))
+                                 "::"
+                                 (subseq string (- l extr) l)))))))
 
 ;;; primitive objects
 (defmethod format% ((integer integer))
@@ -80,16 +80,22 @@ may be of varying length."
         ((minusp integer) (mft:infix-expression1 '- (format (- integer))))
         ;; automatic factorisation
         ((integerp *integer-display*)
-         (mft:factorisation (nt-f:factorise-over-s integer *integer-display*)
-                        (clambda mft:integer x!)))
+         (aif (nt-f:factorise integer t *integer-display*)
+              (mft:factorisation it (clambda mft:integer x!))
+              (mft:integer 1)))
         ((eq :factorise *integer-display*)
-         (mft:factorisation (nt-f:factorise integer)
-                        (clambda mft:integer x!)))
+         (aif (nt-f:factorise integer)
+              (mft:factorisation it (clambda mft:integer x!))
+              (mft:integer 1)))
         ((eq :abbrev *integer-display*)
-         (mft:integer (abbrev-integer integer)))
+         (abbrev-integer integer))
         ((eq :abbrev+ *integer-display*)
-         (mft:integer (abbrev-integer integer t)))
+         (abbrev-integer integer t))
         (t (mft:integer integer))))
+
+(defmacro with-stdint (&body body)
+  `(let ((*integer-display* nil))
+     ,@body))
 
 (defmethod format% ((rational rational))
   (mft:fraction (format (numerator rational))
@@ -181,17 +187,17 @@ may be of varying length."
                          (format coeff)
                          (format var))))
           (one
-           (mft:superscript (format var) (format deg)))
+           (mft:superscript (format var) (with-stdint (format deg))))
           (t
            (mft:product
             (list (format coeff)
-                  (mft:superscript (format var) (format deg))))))))
+                  (mft:superscript (format var) (with-stdint (format deg)))))))))
 
 (defun format-monomial/all (var params)
   (dbind (coeff deg) params
     (mft:product (list
                   (format coeff)
-                  (mft:superscript (format var) (format deg))))))
+                  (mft:superscript (format var) (with-stdint (format deg)))))))
 
 (defun format-polynomial (polynomial)
   (let ((cc (clean-coeffs (coefficients polynomial) (degree polynomial))))
