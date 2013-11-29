@@ -17,7 +17,8 @@
    #:*print-additional-terms*
    #:*continued-fraction-display-length*
    #:*enable-presentations*
-   #:format-pretty))
+   #:format-pretty
+   #:*integer-display*))
 
 (in-package :math-utils-format)
 
@@ -43,7 +44,7 @@
 
 (defparameter *integer-display* nil
   "Possible values:
-* nil -- just produce an integer
+* nil or :standard -- just produce an integer
 * an integer S -- pull out all factors smaller than S, in particular the sign
 * :factorise -- factorise completely
 * :abbrev -- apply `abbrev-integer' to the integer
@@ -73,7 +74,9 @@ may be of varying length."
 ;;; primitive objects
 (defmethod format% ((integer integer))
   ;; TODO add colour
-  (cond ((not *integer-display*) (mft:integer integer))
+  (cond ((or (not *integer-display*)
+             (eq :standard *integer-display*))
+         (mft:integer integer))
         ((minusp integer) (mft:infix-expression1 '- (format (- integer))))
         ;; automatic factorisation
         ((integerp *integer-display*)
