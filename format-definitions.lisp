@@ -14,15 +14,15 @@
 (defun formatted-p (object)
   (typep object 'abstract-format))
 
-(defmacro define-abstract-format (name &rest slots)
+(defmacros! define-abstract-formats (name &rest slots)
   `(progn
      (defclass ,name (abstract-format)
-        ,(mapcar (lambda (slot)
-                   (destructuring-bind (slot-name &optional default-value) (mklist slot)
-                     `(,slot-name :reader ,slot-name
-                                  :initform ,default-value
-                                  :initarg ,(keyw slot-name))))
-                 slots))
+       ,(mapcar (lambda (slot)
+                  (destructuring-bind (slot-name &optional default-value) (mklist slot)
+                    `(,slot-name :reader ,slot-name
+                                 :initform ,default-value
+                                 :initarg ,(keyw slot-name))))
+                slots))
      ;; todo really want &optional??
      (defun ,name (&optional ,@slots
                              (colour *default-colour*)
@@ -38,9 +38,6 @@
      (let ((*default-scaling* scaling)
            (*default-colour* colour))
        ,@body)))
-
-(defmacro define-abstract-formats (&body formats)
-  `(progn ,@(mapcar #`(define-abstract-format ,@a1) formats)))
 
 (define-abstract-formats
   (ellipsis)
