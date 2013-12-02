@@ -23,7 +23,6 @@
                                  :initform ,default-value
                                  :initarg ,(keyw slot-name))))
                 slots))
-     ;; todo really want &optional??
      (defun ,name (&optional ,@slots
                              (colour *default-colour*)
                              (scaling *default-scaling*))
@@ -68,7 +67,7 @@
   (length (array-dimensions (elements grid2))))
 
 
-;;; todo composite formats
+;;; composite formats
 (define-composite-format tuple (coordinates (separator #\,) )
   (parentheses (if (<= (length coordinates) 1) (first coordinates)
                    (infix-expression (foreach1 nil separator coordinates)
@@ -77,26 +76,19 @@
 (define-composite-format prefix-expression (operator arguments (separator #\,))
   (infix-expression1 operator (tuple arguments separator)))
 
-(define-composite-format factorisation (factors (key #'identity))
+(define-composite-format factorisation (factors)
   (infix-expression (foreach1 nil '* factors)
                     (map 'list (lambda (factor)
                                  (if (consp factor)
-                                     ;; todo verify factorisation uses conses?
-                                     (superscript (funcall key (car factor))
-                                                  ;; assume exponents
-                                                  ;; are integers
-                                                  ;; fix actually,
-                                                  ;; this formatting
-                                                  ;; should have been
-                                                  ;; done earlier
-                                                  (mft:integer (cdr factor)))
-                                     (funcall key factor)))
+                                     (superscript (car factor)
+                                                  (cdr factor))
+                                     factor))
                          factors)))
 
-(define-composite-format rational-factorisation (factors (key #'identity))
+(define-composite-format rational-factorisation (factors)
   (let ((nums (remove-if-not (lambda (factor) (or (atom factor) (<= 0 (cdr factor)))) factors))
         (dens (remove-if-not (lambda (factor) (and (consp factor) (> 0 (cdr factor)))) factors)))
-    (fraction (factorisation nums key) (factorisation dens key))))
+    (fraction (factorisation nums) (factorisation dens))))
 
 (define-composite-format sum (summands)
   (infix-expression (foreach1 nil '+ summands) summands))

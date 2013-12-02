@@ -72,6 +72,12 @@ may be of varying length."
                                  (subseq string (- l extr) l)))))))
 
 ;;; primitive objects
+(defun on-leaves (function)
+  (alambda (tree)
+    (if (consp tree)
+        (cons (self (car tree)) (self (cdr tree)))
+        (funcall function tree))))
+
 (defmethod format% ((integer integer))
   ;; TODO add colour
   (cond ((or (not *integer-display*)
@@ -81,11 +87,11 @@ may be of varying length."
         ;; automatic factorisation
         ((integerp *integer-display*)
          (aif (nt-f:factorise integer t *integer-display*)
-              (mft:factorisation it (clambda mft:integer x!))
+              #1=(mft:factorisation (mapcar (on-leaves #'mft:integer) it))
               (mft:integer 1)))
         ((eq :factorise *integer-display*)
          (aif (nt-f:factorise integer)
-              (mft:factorisation it (clambda mft:integer x!))
+              #1#
               (mft:integer 1)))
         ((eq :abbrev *integer-display*)
          (abbrev-integer integer))
@@ -120,7 +126,6 @@ may be of varying length."
 
 ;; complex numbers
 (defmethod format% ((complex complex))
-  ;; TODO sign detection.
   (mft:sum (list (format (realpart complex))
                  (mft:product (list (format% #\i)
                                     (format (imagpart complex)))))))
@@ -171,8 +176,6 @@ may be of varying length."
         (unless (zero-p c)
           (collect (list cc i (one-p cc) m)))))
 
-;;; TODO some inconsistence with print-superscript, which does not get
-;;; called with results of print-math-object
 (defun format-monomial (var params)
   (dbind (coeff deg one neg) params
     (declare (ignorable neg))
@@ -274,14 +277,18 @@ may be of varying length."
 (defmethod format% ((inf (eql infinity-)))
   (mft:infix-expression1 '- (mft:infinity)))
 
-;; todo elliptic-curve-weierstrass
-;; todo elementary-matrix
 ;;; vector
 (defmethod format% ((vector vector))
   (mft:matrix2 (map-array1 #'format (entries vector))))
 
-;;; TODO what about presentations? those should be automatically generated.
+;;; elementary-matrix
+(defmethod format% ((matrix linear-algebra/elementary-matrices:elementary-matrix))
+  ;; do not explicitly show 0 entries
+  (mft:matrix2 (map-array1 (lambda (x) (if (zerop x) nil (format x)))
+                           (entries (gm:-> 'matrix matrix)))))
 
+
+;;; presentations should be automatically generated.
 (defun format-pretty (object &key (presentations t))
   (let ((*print-poly-pretty* t)
         (*enable-presentations* presentations))

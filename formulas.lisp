@@ -77,7 +77,6 @@
                  (formula-prepare (second arguments))))
 
 (defmethod formula-prepare% ((function-symbol symbol) arguments)
-  ;; TODO put the arguments in brackets, perhaps separated by commas
   (mft:prefix-expression function-symbol (mapcar #'formula-prepare arguments)))
 
 
