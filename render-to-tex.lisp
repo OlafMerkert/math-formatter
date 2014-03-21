@@ -1,6 +1,7 @@
 (defpackage :render-to-tex
   (:use :cl :ol :iterate )
-  (:export))
+  (:export
+   #:render))
 
 (in-package :render-to-tex)
 
@@ -8,9 +9,12 @@
 
 (defmacro def-render-method ((format) &body body)
   `(defmethod render ((,format ,(symb+ :mft format)) stream)
-     (flet ((pr (x) (princ x stream))
-            (fmt  (&rest args) (apply #'format stream args))
-            (rndr (x) (render x stream)))
+     (labels ((pr (x) (princ x stream))
+              (fmt  (&rest args) (apply #'format stream args))
+              (rndr (x) (render x stream))
+              (varfmt (name) (if (length=1 name)
+                   (fmt "~(~A~)" name)
+                   (fmt "~(\\mathrm{~A}~)" name))))
        ,@body)))
 
 (defmacro def-render-methods (&body specs)
@@ -27,10 +31,7 @@
 (def-render-methods
   (integer) (pr (mft:n integer))
   (number) (pr (mft:n number))
-  (variable) (let ((name (mkstr (mft:name variable))))
-               (if (length=1 name)
-                   (pr name)
-                   (fmt "\\mathrm{~A}" name)))
+  (variable) (varfmt (mkstr (mft:name variable)))
   (text) (fmt "\\text{~A}" (mft:content text)))
 
 ;; composed
@@ -68,7 +69,7 @@
         (unless (first-iteration-p)
           (pr " "))
         (if op
-            (fmt "~A " op)
+            (varfmt (mkstr op))
             (unless (first-iteration-p)
               (pr "\\, ")))
         (rndr arg)))
