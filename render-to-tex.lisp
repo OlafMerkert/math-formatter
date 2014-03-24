@@ -12,10 +12,33 @@
      (labels ((pr (x) (princ x stream))
               (fmt  (&rest args) (apply #'format stream args))
               (rndr (x) (render x stream))
-              (varfmt (name) (if (length=1 name)
-                   (fmt "~(~A~)" name)
-                   (fmt "~(\\mathrm{~A}~)" name))))
+              (varfmt (name) (variable->command (mkstr name) stream)))
        ,@body)))
+
+;;; automatic recognition of commands (for operators and variables)
+(defpar known-commands '("alpha"
+                         "beta"
+                         "gamma"
+                         "delta"
+                         "epsilon"
+                         "phi"
+                         "psi"
+                         "pi"
+                         "theta"
+                         "exp"
+                         "log"
+                         "lim"))
+
+(defpar uppercase-vars '(#\X))
+
+(defun variable->command (name stream)
+  (if (length=1 name)
+      (if (member (elt name 0) uppercase-vars :test #'char-equal)
+          (format stream "~:@(~A~)" name)
+          (format stream "~(~A~)" name))
+      (if (member name known-commands :test #'string-equal)
+          (format stream "~(\\~A~)" name)
+          (format stream "~(\\mathrm{~A}~)" name))))
 
 (defmacro def-render-methods (&body specs)
   `(progn
@@ -33,7 +56,7 @@
 (def-render-methods
   (integer) (pr (mft:n integer))
   (number) (pr (mft:n number))
-  (variable) (varfmt (mkstr (mft:name variable)))
+  (variable) (varfmt (mft:name variable))
   (text) (fmt "\\text{~A}" (mft:content text)))
 
 ;; composed
@@ -71,7 +94,7 @@
         (unless (first-iteration-p)
           (pr " "))
         (if op
-            (varfmt (mkstr op))
+            (varfmt op)
             (unless (first-iteration-p)
               (pr "\\, ")))
         (rndr arg)))
@@ -106,3 +129,4 @@
   (let ((math-utils-format:*print-poly-pretty* t))
    (render (math-utils-format:format object) stream)))
 
+;;; todo treat thing like \sqrt specially
