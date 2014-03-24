@@ -21,6 +21,8 @@
   `(progn
      ,@(mapcar #`(def-render-method ,@a1) (group specs 2))))
 
+(defmethod render ((obj (eql nil)) stream)
+  (warn "Rendering NIL"))
 
 ;; placeholders
 (def-render-methods
