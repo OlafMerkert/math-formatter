@@ -126,4 +126,5 @@ end if `at-end' is non-nil. Note this operation is destructive."
   (defmethod print-object ((object math-type) stream)
     (princ "#M[" stream)
     (render (math-utils-format:format object) stream)
-    (princ "]" stream)))
+    (princ "]" stream)
+    object))
